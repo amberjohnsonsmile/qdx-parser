@@ -2,6 +2,7 @@ require 'csv'
 require 'time'
 require 'active_support'
 require 'active_support/core_ext'
+require 'pry'
 require './qdx_fields'
 
 module Qdx
@@ -219,11 +220,15 @@ def parse()
   tickets = []
   parser = Qdx::QdxParse.new(file) { |ticket| tickets << ticket }
   parser.parse
-  # We'll just do one for now
-  # puts tickets[0]
-  # tickets[0]
-  # Output to new file
-  CSV.open("#{file[0...-4]}.csv", "wb") {|csv| tickets.to_a.each {|elem| csv << elem} }
+  # CSV.open("#{file[0...-4]}.csv", "wb") {|csv| tickets.each {|elem| csv << elem} }
+
+  CSV.open("#{file[0...-4]}.csv", "wb") do |csv|
+    csv << tickets[0].members # adds the attributes name on the first line
+    tickets.each do |hash|
+      csv << hash.to_a
+    end
+  end
+
 end
 
 parse()
