@@ -216,19 +216,23 @@ module Qdx
 end
 
 def parse()
-  file = ARGV[0]
-  tickets = []
-  parser = Qdx::QdxParse.new(file) { |ticket| tickets << ticket }
-  parser.parse
-  # CSV.open("#{file[0...-4]}.csv", "wb") {|csv| tickets.each {|elem| csv << elem} }
+  begin
+    file = ARGV[0]
+    tickets = []
 
-  CSV.open("#{file[0...-4]}.csv", "wb") do |csv|
-    csv << tickets[0].members # adds the attributes name on the first line
-    tickets.each do |hash|
-      csv << hash.to_a
+    parser = Qdx::QdxParse.new(file) { |ticket| tickets << ticket }
+    parser.parse
+
+    CSV.open("#{file[0...-4]}.csv", "wb") do |csv|
+      csv << tickets[0].members # adds the attributes name on the first line
+      tickets.each do |hash|
+        csv << hash.to_a
+      end
     end
+    puts "File successfully parsed as #{file[0...-4]}.csv"
+  rescue => e
+    puts "Could not parse file. Error: #{e.message}"
   end
-
 end
 
 parse()
