@@ -204,7 +204,8 @@ module Qdx
           csv << [ticket[:store_id], ticket[:ticket_id], ticket[:loyaltycard], item[:datetime], item[:upc], item[:quantity], item[:price], ticket[:account_number], ticket[:total]]
         end
       end
-      puts csv_string
+      # puts csv_string
+      csv_string
     end
 
     def method_missing(m, *args, &block)
@@ -215,7 +216,7 @@ module Qdx
   end
 end
 
-def parse()
+def parseFile()
   begin
     file = ARGV[0]
     tickets = []
@@ -223,16 +224,19 @@ def parse()
     parser = Qdx::QdxParse.new(file) { |ticket| tickets << ticket }
     parser.parse
 
-    CSV.open("#{file[0...-4]}.csv", "wb") do |csv|
-      csv << tickets[0].members # adds the attributes name on the first line
-      tickets.each do |hash|
-        csv << hash.to_a
+    CSV.open("#{file[0...-4]}.csv", "w", {:col_sep => "|"}) do |csv|
+      csv << tickets[0].members
+      tickets.each do |ticket|
+        ticket.line_items.each do |item|
+          csv << [ticket[:store_id], ticket[:ticket_id], ticket[:loyaltycard], item[:datetime], item[:upc], item[:quantity], item[:price], ticket[:account_number], ticket[:total]]
+        end
       end
     end
+
     puts "File successfully parsed as #{file[0...-4]}.csv"
   rescue => e
-    puts "Could not parse file. Error: #{e.message}"
+    puts "Could not parse file.\nError: #{e.message}\nStacktrace: #{e.backtrace}"
   end
 end
 
-parse()
+parseFile()
